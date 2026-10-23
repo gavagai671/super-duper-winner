@@ -1,0 +1,10 @@
+mpmath
+numpy
+pandas
+pymongo
+python-dateutil
+pytz
+PyYAML
+regex
+six
+sympy

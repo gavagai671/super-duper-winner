@@ -1,0 +1,2 @@
+formula,start,iterations,k
+16**16,0x5bec * (16 ** ((2 * size_of_result|data/start_here/100_digits_pi2/calculate_digits_pi.csv) - 5)) + 0x9a450000000000000000,iteration|data/start_here/100_digits_pi2/calculate_digits_pi.csv - ((0x5bec * (16 ** ((2 * 42) - 5)) + 0x9a450000000000000000)//16**16),16**20

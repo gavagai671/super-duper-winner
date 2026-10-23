@@ -1,0 +1,2 @@
+formula,target,iterations
+(data/start_here/calculations_raise_exponent_1million.csv // 17**20) * 17**20,data/start_here/calculations_raise_exponent_1million.csv,1

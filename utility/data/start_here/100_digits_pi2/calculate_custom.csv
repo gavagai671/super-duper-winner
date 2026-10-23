@@ -1,0 +1,2 @@
+formula,start,target_condition,iterations
+16**16,result|data/start_here/100_digits_pi2/calculate_target_size.csv,({} & 0xffff) == 0x64cb,100

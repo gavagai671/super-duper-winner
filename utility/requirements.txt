@@ -1,0 +1,10 @@
+#mpmath==1.0.0
+numpy==1.16.0
+pandas==0.24.0
+pymongo==3.6.1
+python-dateutil==2.7.2
+pytz==2018.4
+PyYAML==3.12
+regex==2018.2.21
+six==1.11.0
+sympy==1.1.1

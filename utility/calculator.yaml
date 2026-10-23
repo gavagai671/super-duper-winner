@@ -1,0 +1,18 @@
+---
+log: 
+  logfile: ../logs/compression_calculator.log
+  loglevel: info
+  max_bytes: 268435456
+  num_rollover_logs: 5
+
+mongo_db:
+  dsn: mongodb://localhost/calculatordb
+  pool_size: 30
+  
+  
+compute_optimal_number_of_cpu_threads: true 
+threads: 8
+io_threads: 1
+log_interval: 1000000
+#sample_rate: 100000
+chunk: 10000000

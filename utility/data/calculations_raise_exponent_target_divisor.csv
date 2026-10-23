@@ -1,0 +1,2 @@
+formula,raise exponent,target
+2**2,20,data/target_divisor.txt

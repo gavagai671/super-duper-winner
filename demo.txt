@@ -1,0 +1,3 @@
+python calculator.py -c calculator.yaml  -f "data/calculations_raise_exponent.csv"
+python calculator.py -c calculator.yaml -f "data/calculations_k_inc_result_from_file2.csv" -sh
+python calculator.py -c calculator.yaml  -e "data/calculations_k_inc_result_from_file2.csv  ** 1415"

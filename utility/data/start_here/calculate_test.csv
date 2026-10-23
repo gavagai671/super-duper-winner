@@ -1,0 +1,2 @@
+formula,iterations
+17**20/(distance_from_target|data/start_here/calculations_raise_exponent_1million.csv + 0x12e2a48e112b38fdb9413),1

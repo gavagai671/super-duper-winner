@@ -1,0 +1,2 @@
+formula,raise exponent,target
+2**2,20,data/100_digits_pi.txt
