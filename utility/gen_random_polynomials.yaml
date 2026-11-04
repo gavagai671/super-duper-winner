@@ -1,0 +1,12 @@
+---
+log: 
+  logfile: ../logs/gen_random_polynomials.log
+  loglevel: info
+  max_bytes: 268435456
+  num_rollover_logs: 5
+
+mongo_db:
+  dsn: mongodb://localhost/polynomials
+  pool_size: 30
+  
+  
