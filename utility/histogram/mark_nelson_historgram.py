@@ -1,8 +1,23 @@
+import math
+import os
 from collections import Counter, defaultdict
 import logging
 from pymongo import MongoClient as Client
 from utility.generic_config import GenericConfig, Logger
+from gridfs.grid_file_shared import DEFAULT_CHUNK_SIZE
 
+
+DEFAULT_CHUNK_SIZE=18
+DEFAULT_DISPLAY_SIZE=300
+
+def binary_string_to_hex(binary_str):
+    # 1. Convert binary string to integer, then integer to hex
+    # 2. Use [2:] to slice off the '0x' prefix and upper() for uppercase hex
+    hex_str = hex(int(binary_str, 2))[2:].upper()
+    
+    # 3. Pad with leading zeros to ensure a consistent 5-character width
+    hex_str_padded = hex_str.zfill(5)
+    return hex_str_padded
                    
 class MarkNelsonHistorgramSettings(GenericConfig):
 
@@ -31,35 +46,31 @@ class MarkNelsonHistorgram(object):
         self.mongo_db = client.get_default_database()
         with open(self.options.args.filename, "rb") as f:
             self.bytestream = f.read()
-        self.sections_by_bit_string = {}
+        self.sections_by_binary_string = {}
         self.global_data_counter = None
         
     def print_sorted_bitstrings(self, keys, data_counter, max_display, is_section):
         
         if is_section:
-            print("\nBit string,Count")
+            print("\nBinary string,Count")
         else:
-            print("\nBit string,Count,Section")
-        for bit_string in keys[:max_display]:
+            print("\nBinary string,Count,Section")
+        for binary_string in keys[:max_display]:
             if is_section:
-                print(f"{bit_string},{data_counter[bit_string]}")
+                print(f"{binary_string_to_hex(binary_string)},{data_counter[binary_string]}")
             else:
-                sections = ' '.join(str(num) for num in sorted(self.sections_by_bit_string[bit_string])) if bit_string in self.sections_by_bit_string else '0'
-                print(f"{bit_string},{data_counter[bit_string]},{sections}")      
+                sections = ' '.join(str(num) for num in sorted(self.sections_by_binary_string[binary_string])) if binary_string in self.sections_by_binary_string else ''
+                print(f"{binary_string_to_hex(binary_string)},{data_counter[binary_string]},{sections}")      
                 
     def process(self):
-        for i in range(3):
+        num_of_chunks = math.ceil(os.path.getsize(self.options.args.filename)/(2**18//8))
+        for i in range(num_of_chunks):
             self.process_section(section=i)
-        self.process_section(section=3, chunk_size=17)
+        #self.process_section(section=3, chunk_size=17)
         self.process_section()
         
-    def aggregate_frequencies(self, data_counter):
-        frequency_groups = defaultdict(list)
-        for item, freq in data_counter.items():
-            frequency_groups[freq].append(item) 
-        return sum(len(frequency_groups[freq]) for freq in frequency_groups.keys())
     
-    def process_section(self, chunk_size=18, max_display=300, section=None):
+    def process_section(self, chunk_size=DEFAULT_CHUNK_SIZE, max_display=DEFAULT_DISPLAY_SIZE, section=None):
         
         MASK_18_BIT = (1 << chunk_size) - 1  # 0x3FFFF (or 262143)
         max_value = 2 ** chunk_size
@@ -90,20 +101,23 @@ class MarkNelsonHistorgram(object):
             start = section * (max_value // 8)
                      
             for b in self.bytestream[start:start + (max_value // 8)]:
-                bit_string = f"{b:08b}"
+                binary_string = f"{b:08b}"
                 if len(chunk_string) + 8 <= chunk_size:
-                    chunk_string += bit_string
+                    chunk_string += binary_string
                 else:
                     size_needed = chunk_size - len(chunk_string)
-                    chunk_string += bit_string[:size_needed]
+                    chunk_string += binary_string[:size_needed]
                     data_counter.update([chunk_string])
                     self.global_data_counter.update([chunk_string])
-                    if chunk_string not in self.sections_by_bit_string:
-                        self.sections_by_bit_string[chunk_string] = set()
-                    self.sections_by_bit_string[chunk_string].add(section)
-                    chunk_string = bit_string[size_needed:]     
+                    if chunk_string not in self.sections_by_binary_string:
+                        self.sections_by_binary_string[chunk_string] = set()
+                    self.sections_by_binary_string[chunk_string].add(section)
+                    chunk_string = binary_string[size_needed:]     
         else:
             data_counter = self.global_data_counter      
+            
+        #self.global_data_counter += data_counter
+
         
         # 1. Sample data: A Counter object representing item frequencies
         
@@ -127,22 +141,23 @@ class MarkNelsonHistorgram(object):
         for freq in sorted(frequency_groups.keys(), reverse=True):
             print(f"{freq},{len(frequency_groups[freq])}")
             
-        print(f"\nTotal number of items: {sum(len(frequency_groups[freq]) for freq in frequency_groups.keys())}")
+        #print(f"\nTotal number of items: {sum(len(frequency_groups[freq]) for freq in frequency_groups.keys())}")
+        print(f"\nTotal number of nonzero binary_strings: {data_counter.total()}")
           
-        print(f"\nTop {max_display} items by frequency in descending order, bit_strings are in ascending order:")
+        print(f"\nTop {max_display} sorted by frequency in descending order, binary strings are in ascending order:")
         
-        print("\n\nBit_string,Count")
-        for item, count in sorted_summary[:max_display]:
-            print(f"{item},{count}")
+        print("\n\nBinary_string,Count")
+        for binary_string, count in sorted_summary[:max_display]:
+            print(f"{binary_string_to_hex(binary_string)},{count}")
         
         keys = sorted(list(data_counter.keys()))
                 
-        print(f"\n\nTop {max_display} bit strings sorted by value in ascending order")
+        print(f"\n\nTop {max_display} binary strings sorted by value in ascending order")
         
         self.print_sorted_bitstrings(keys, data_counter, max_display, is_section=section is not None)
 
         keys = sorted(keys, reverse=True)
-        print(f"\n\nBottom {max_display} bit strings sorted by value in descending order")
+        print(f"\n\nBottom {max_display} binary strings sorted by value in descending order")
 
         self.print_sorted_bitstrings(keys, data_counter, max_display, is_section=section is not None)
             
