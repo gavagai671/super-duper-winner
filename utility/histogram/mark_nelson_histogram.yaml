@@ -1,0 +1,12 @@
+---
+log: 
+  logfile: ../../logs/mark_nelson_histogram.log
+  loglevel: info
+  max_bytes: 268435456
+  num_rollover_logs: 5
+
+mongo_db:
+  dsn: mongodb://localhost/rpc
+  pool_size: 30
+  
+
